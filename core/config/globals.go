@@ -10,20 +10,20 @@ import (
 var Platform string
 var Arch string
 var HomeDirectory string
-var ConfigDirectory string
+var AppDirectory string
 
 func InitConfig() {
 	Platform = runtime.GOOS
 	Arch = runtime.GOARCH
 	HomeDirectory, _ = os.UserHomeDir()
-	ConfigDirectory = fmt.Sprintf("%s%s%s", HomeDirectory, string(os.PathSeparator), ".gvm-baron")
+	AppDirectory = fmt.Sprintf("%s%s%s", HomeDirectory, string(os.PathSeparator), ".gvm-baron")
 
-	_, err := os.Stat(ConfigDirectory)
+	_, err := os.Stat(AppDirectory)
 	if os.IsNotExist(err) {
-		log.Println("Config directory does not exist, creating...")
-		err := os.Mkdir(ConfigDirectory, 0755)
+		log.Println("App directory does not exist, creating...")
+		err := os.Mkdir(AppDirectory, 0755)
 		if err != nil {
-			log.Fatalf("Error creating config directory: %v", err)
+			log.Fatalf("Error creating app directory: %v", err)
 		}
 	}
 }
