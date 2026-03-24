@@ -12,6 +12,7 @@ var Arch string
 var HomeDirectory string
 var AppDirectory string
 var TempDirectory string
+var CacheDirectory string
 var DebugEnabled bool
 
 func InitConfig() {
@@ -24,4 +25,7 @@ func InitConfig() {
 
 	TempDirectory = fmt.Sprintf("%s%s%s", AppDirectory, string(os.PathSeparator), "temp")
 	logic.CreateDir(TempDirectory)
+
+	CacheDirectory = fmt.Sprintf("%s%s%s", AppDirectory, string(os.PathSeparator), "cache")
+	logic.CreateDir(CacheDirectory)
 }
