@@ -10,6 +10,7 @@ import (
 
 var ListType string
 var ListEnabled bool
+var DebugEnabled bool
 
 func InitFlags() {
 	args := os.Args[1:]
@@ -26,6 +27,8 @@ func InitFlags() {
 	os.Args = append([]string{os.Args[0]}, args...)
 
 	listType := flag.String("list", "stable", "latest | stable | lts | all")
+
+	flag.BoolVar(&DebugEnabled, "debug", false, "Enable debug mode")
 	flag.Parse()
 	ListType = *listType
 
