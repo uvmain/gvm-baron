@@ -22,4 +22,12 @@ func main() {
 		versions := sources.GetVersions()
 		log.Printf("Available Go versions: %v", versions)
 	}
+
+	if flags.DownloadEnabled {
+		if flags.DownloadVersion == "" {
+			log.Printf("No version specified for download. Use --download=<version> to specify a version.")
+			return
+		}
+		sources.DownloadVersion(flags.DownloadVersion)
+	}
 }

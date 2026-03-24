@@ -13,6 +13,7 @@ var HomeDirectory string
 var AppDirectory string
 var TempDirectory string
 var CacheDirectory string
+var VersionsDirectory string
 var DebugEnabled bool
 
 func InitConfig() {
@@ -28,4 +29,7 @@ func InitConfig() {
 
 	CacheDirectory = fmt.Sprintf("%s%s%s", AppDirectory, string(os.PathSeparator), "cache")
 	logic.CreateDir(CacheDirectory)
+
+	VersionsDirectory = fmt.Sprintf("%s%s%s", AppDirectory, string(os.PathSeparator), "versions")
+	logic.CreateDir(VersionsDirectory)
 }
