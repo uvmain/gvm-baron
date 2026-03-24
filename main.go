@@ -1,13 +1,11 @@
 package main
 
 import (
+	"gvm/core/config"
 	"log"
-	"runtime"
 )
 
 func main() {
-	platform := runtime.GOOS
-	arch := runtime.GOARCH
-	log.Printf("Running on architecture: %s", arch)
-	log.Printf("Running on platform: %s", platform)
+	log.Printf("Running on architecture: %s", config.Arch)
+	log.Printf("Running on platform: %s", config.Platform)
 }
