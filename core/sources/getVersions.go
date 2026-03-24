@@ -2,6 +2,7 @@ package sources
 
 import (
 	"encoding/json"
+	"gvm/core/flags"
 	"log"
 	"net/http"
 	"net/url"
@@ -16,14 +17,14 @@ const (
 	VersionTypeAll    VersionType = "all"
 )
 
-func GetVersions(versionType VersionType) []string {
+func GetVersions() []string {
 	packageUrl, err := url.Parse("https://go.dev/dl/")
 	if err != nil {
 		log.Fatal(err)
 	}
 	query := packageUrl.Query()
 	query.Add("mode", "json")
-	if versionType == VersionTypeAll {
+	if flags.ListType == string(VersionTypeAll) {
 		query.Add("include", "all")
 	}
 	packageUrl.RawQuery = query.Encode()
@@ -41,10 +42,10 @@ func GetVersions(versionType VersionType) []string {
 	if err := json.NewDecoder(response.Body).Decode(&data); err != nil {
 		return []string{}
 	}
-	switch versionType {
-	case VersionTypeLatest:
+	switch flags.ListType {
+	case string(VersionTypeLatest):
 		versions = append(versions, data[0].Version)
-	case VersionTypeLts:
+	case string(VersionTypeLts):
 		versions = append(versions, data[1].Version)
 	default:
 		for _, v := range data {
