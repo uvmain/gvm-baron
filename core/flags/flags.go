@@ -2,6 +2,7 @@ package flags
 
 import (
 	"flag"
+	"log"
 	"os"
 	"slices"
 	"strings"
@@ -27,4 +28,9 @@ func InitFlags() {
 	listType := flag.String("list", "stable", "latest | stable | lts | all")
 	flag.Parse()
 	ListType = *listType
+
+	if ListEnabled && !slices.Contains([]string{"latest", "stable", "lts", "all"}, ListType) {
+		log.Printf("Invalid list type: %s. Valid options are: latest, stable, lts, all. Defaulting to 'stable'", ListType)
+		ListType = "stable"
+	}
 }
