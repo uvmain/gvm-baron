@@ -38,7 +38,7 @@ func InitFlags() {
 
 	flag.BoolVar(&DebugEnabled, "debug", false, "Enable debug mode")
 
-	downloadVersion := flag.String("download", "", "Specify the version to download")
+	downloadVersion := flag.String("download", "", "latest | lts | x.y.z | x.y")
 
 	flag.Parse()
 

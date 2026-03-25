@@ -28,6 +28,9 @@ func main() {
 			log.Printf("No version specified for download. Use --download=<version> to specify a version.")
 			return
 		}
-		sources.DownloadVersion(flags.DownloadVersion)
+		err := sources.DownloadVersion(flags.DownloadVersion)
+		if err != nil {
+			log.Printf("Error downloading version %s: %v", flags.DownloadVersion, err)
+		}
 	}
 }

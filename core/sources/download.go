@@ -2,6 +2,7 @@ package sources
 
 import (
 	"fmt"
+	"gvm/core/compression"
 	"gvm/core/config"
 	"gvm/core/logic"
 	"io"
@@ -34,8 +35,8 @@ func DownloadVersion(version string) error {
 	downloadUrl := GenerateDownloadUrl(version)
 	fileName := GenerateFileName(version)
 	logic.DebugPrintf("Downloading version %s from URL: %s", version, downloadUrl)
-	targetPath := filepath.Join(config.TempDirectory, fileName)
-	out, err := os.Create(targetPath)
+	tempFilePath := filepath.Join(config.TempDirectory, fileName)
+	out, err := os.Create(tempFilePath)
 	if err != nil {
 		return err
 	}
@@ -51,5 +52,18 @@ func DownloadVersion(version string) error {
 	if err != nil {
 		return err
 	}
+
+	targetPath := filepath.Join(config.VersionsDirectory, fmt.Sprintf("go%s", version))
+
+	err = compression.DecompressFile(tempFilePath, targetPath)
+	if err != nil {
+		return err
+	}
+
+	err = logic.DeleteFile(tempFilePath)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

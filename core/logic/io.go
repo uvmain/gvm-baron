@@ -15,3 +15,11 @@ func CreateDir(directoryPath string) {
 		}
 	}
 }
+
+func DeleteFile(filePath string) error {
+	err := os.Remove(filePath)
+	if err != nil {
+		return err
+	}
+	return nil
+}
