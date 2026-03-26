@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"gvm/core/config"
 	"gvm/core/logger"
 	"gvm/core/sources"
-	"log"
 	"os"
 	"slices"
 	"strings"
@@ -27,8 +27,12 @@ func main() {
 		}
 	}
 
-	if len(args) == 0 {
-		log.Println("No action specified. Valid actions are: list, install, alias.")
+	if len(args) == 0 || (slices.Contains(flags, "--help") && !slices.Contains(flags, "-h")) {
+		if len(arguments) == 0 {
+			fmt.Println("No action specified. Valid actions are: list, install, alias.")
+			fmt.Println()
+		}
+		printHelp()
 		return
 	}
 
@@ -73,37 +77,55 @@ func main() {
 			logger.DebugPrintln("Listing stable versions...")
 			versions = sources.GetVersions(sources.VersionTypeStable)
 		default:
-			log.Printf("Unknown version type: %s. Valid types are: latest, lts, stable, all.", versionType)
+			fmt.Printf("Unknown version type: %s. Valid types are: latest, lts, stable, all.", versionType)
 			return
 		}
-		log.Printf("Available Go versions: %v", versions)
+		fmt.Printf("Available Go versions: %v", versions)
 	case "install":
 		if len(args) < 2 {
-			log.Printf("No version specified for install action. Usage: gvm install <version>")
+			fmt.Printf("No version specified for install action. Usage: gvm install <version>")
 			return
 		}
 		version := args[1]
 		logger.DebugPrintf("Installing Go version: %s", version)
 		err := sources.DownloadVersion(version)
 		if err != nil {
-			log.Printf("Error downloading version %s: %v", version, err)
+			fmt.Printf("Error downloading version %s: %v", version, err)
 		}
 	case "alias":
 		if len(args) < 3 {
-			log.Printf("Not enough arguments for alias action. Usage: gvm alias <source> <target>")
+			fmt.Printf("Not enough arguments for alias action. Usage: gvm alias <source> <target>")
 			return
 		}
 		aliasSource := args[1]
 		aliasTarget := args[2]
 		if aliasSource == "" || aliasTarget == "" {
-			log.Printf("Both --alias-source and --alias-target must be specified to create an alias.")
+			fmt.Printf("Both --alias-source and --alias-target must be specified to create an alias.")
 			return
 		}
 		err := sources.AddAlias(aliasSource, aliasTarget)
 		if err != nil {
-			log.Printf("Error creating alias from %s to %s: %v", aliasSource, aliasTarget, err)
+			fmt.Printf("Error creating alias from %s to %s: %v", aliasSource, aliasTarget, err)
 		}
 	default:
-		log.Printf("Unknown action: %s. Valid actions are: list, install, alias.", action)
+		fmt.Printf("Unknown action: %s. Valid actions are: list, install, alias.", action)
 	}
+}
+
+func printHelp() {
+	fmt.Println(`gvm: Go Version Manager
+
+Usage:
+  gvm <action> [arguments] [flags]
+
+Actions:
+  list [type]              List available Go versions
+                           Types: stable (default), latest, lts, all
+  install <version>        Download and install a Go version
+  alias <source> <target>  Create an alias from one version to another
+
+Flags:
+  -h, --help       Show this help message
+  -d, --debug      Enable debug output
+  -n, --no-cache   Disable caching`)
 }
