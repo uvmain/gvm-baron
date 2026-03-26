@@ -11,8 +11,12 @@ import (
 var ListType string
 var ListEnabled bool
 
-var DownloadEnabled bool
-var DownloadVersion string
+var InstallEnabled bool
+var InstallVersion string
+
+var AliasEnabled bool
+var AliasSource string
+var AliasTarget string
 
 var DebugEnabled bool
 var NoCache bool
@@ -31,20 +35,23 @@ func InitFlags() {
 	}
 	os.Args = append([]string{os.Args[0]}, args...)
 
-	if slices.Contains(args, "--download") || slices.Contains(args, "-download") {
-		DownloadEnabled = true
+	if slices.Contains(args, "--install") || slices.Contains(args, "-install") {
+		InstallEnabled = true
 	}
 
 	listType := flag.String("list", "stable", "latest | stable | lts | all")
 
 	flag.BoolVar(&DebugEnabled, "debug", false, "Enable debug mode")
 	flag.BoolVar(&NoCache, "no-cache", false, "Disable cache")
-	downloadVersion := flag.String("download", "", "latest | lts | x.y.z | x.y")
+	flag.BoolVar(&AliasEnabled, "alias", false, "Create alias for a Go version")
+	flag.StringVar(&AliasSource, "alias-source", "", "Source version for alias (e.g., 1.20)")
+	flag.StringVar(&AliasTarget, "alias-target", "", "Target alias name (e.g., latest)")
+	installVersion := flag.String("install", "", "latest | lts | x.y.z | x.y")
 
 	flag.Parse()
 
 	ListType = *listType
-	DownloadVersion = *downloadVersion
+	InstallVersion = *installVersion
 
 	if ListEnabled && !slices.Contains([]string{"latest", "stable", "lts", "all"}, ListType) {
 		log.Printf("Invalid list type: %s. Valid options are: latest, stable, lts, all. Defaulting to 'stable'", ListType)

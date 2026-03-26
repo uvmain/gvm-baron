@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func GenerateFileName(version string) string {
@@ -44,12 +45,14 @@ func DownloadVersion(version string) error {
 
 	response, err := http.Get(downloadUrl)
 	if err != nil {
+		logic.DeleteFile(tempFilePath)
 		return err
 	}
 	defer response.Body.Close()
 
 	_, err = io.Copy(out, response.Body)
 	if err != nil {
+		logic.DeleteFile(tempFilePath)
 		return err
 	}
 
@@ -57,6 +60,7 @@ func DownloadVersion(version string) error {
 
 	err = compression.DecompressFile(tempFilePath, targetPath)
 	if err != nil {
+		logic.DeleteFile(tempFilePath)
 		return err
 	}
 
@@ -65,5 +69,32 @@ func DownloadVersion(version string) error {
 		return err
 	}
 
+	err = AddAlias(version, "go"+version)
+	if err != nil {
+		return err
+	}
+
+	logic.DebugPrintf("Successfully downloaded and installed Go version %s", version)
+
+	return nil
+}
+
+func AddAlias(sourceVersion string, targetVersion string) error {
+	if !strings.HasPrefix(sourceVersion, "go") {
+		sourceVersion = "go" + sourceVersion
+	}
+	sourcePath := filepath.Join(config.VersionsDirectory, sourceVersion, "go", "bin", "go")
+	targetPath := filepath.Join(config.BinDirectory, targetVersion)
+
+	if logic.FileExists(targetPath) {
+		logic.DebugPrintf("Alias target already exists: %s. Overwriting alias", targetPath)
+		logic.DeleteFile(targetPath)
+	}
+
+	logic.DebugPrintf("Adding alias for version %s: %s -> %s", sourceVersion, sourcePath, targetPath)
+	err := os.Symlink(sourcePath, targetPath)
+	if err != nil {
+		return err
+	}
 	return nil
 }

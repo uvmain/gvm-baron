@@ -14,6 +14,7 @@ var AppDirectory string
 var TempDirectory string
 var CacheDirectory string
 var VersionsDirectory string
+var BinDirectory string
 var DebugEnabled bool
 
 func InitConfig() {
@@ -32,4 +33,9 @@ func InitConfig() {
 
 	VersionsDirectory = fmt.Sprintf("%s%s%s", AppDirectory, string(os.PathSeparator), "versions")
 	logic.CreateDir(VersionsDirectory)
+
+	BinDirectory = fmt.Sprintf("%s%s%s", AppDirectory, string(os.PathSeparator), "bin")
+	logic.CreateDir(BinDirectory)
+
+	logic.DebugPrintf("Initialized config: Platform=%s, Arch=%s, HomeDirectory=%s, AppDirectory=%s, TempDirectory=%s, CacheDirectory=%s, VersionsDirectory=%s, BinDirectory=%s", Platform, Arch, HomeDirectory, AppDirectory, TempDirectory, CacheDirectory, VersionsDirectory, BinDirectory)
 }
