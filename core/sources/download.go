@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"gvm/core/compression"
 	"gvm/core/config"
-	"gvm/core/logic"
+	"gvm/core/files"
+	"gvm/core/logger"
 	"io"
 	"net/http"
 	"os"
@@ -21,21 +22,21 @@ func GenerateFileName(version string) string {
 		extension = "tar.gz"
 	}
 	fileName := fmt.Sprintf("go%s.%s-%s.%s", version, config.Platform, config.Arch, extension)
-	logic.DebugPrintf("Generated file name: %s", fileName)
+	logger.DebugPrintf("Generated file name: %s", fileName)
 	return fileName
 }
 
 func GenerateDownloadUrl(version string) string {
 	fileName := GenerateFileName(version)
 	downloadUrl := fmt.Sprintf("https://golang.org/dl/%s", fileName)
-	logic.DebugPrintf("Generated download URL: %s", downloadUrl)
+	logger.DebugPrintf("Generated download URL: %s", downloadUrl)
 	return downloadUrl
 }
 
 func DownloadVersion(version string) error {
 	downloadUrl := GenerateDownloadUrl(version)
 	fileName := GenerateFileName(version)
-	logic.DebugPrintf("Downloading version %s from URL: %s", version, downloadUrl)
+	logger.DebugPrintf("Downloading version %s from URL: %s", version, downloadUrl)
 	tempFilePath := filepath.Join(config.TempDirectory, fileName)
 	out, err := os.Create(tempFilePath)
 	if err != nil {
@@ -45,14 +46,14 @@ func DownloadVersion(version string) error {
 
 	response, err := http.Get(downloadUrl)
 	if err != nil {
-		logic.DeleteFile(tempFilePath)
+		files.DeleteFile(tempFilePath)
 		return err
 	}
 	defer response.Body.Close()
 
 	_, err = io.Copy(out, response.Body)
 	if err != nil {
-		logic.DeleteFile(tempFilePath)
+		files.DeleteFile(tempFilePath)
 		return err
 	}
 
@@ -60,11 +61,11 @@ func DownloadVersion(version string) error {
 
 	err = compression.DecompressFile(tempFilePath, targetPath)
 	if err != nil {
-		logic.DeleteFile(tempFilePath)
+		files.DeleteFile(tempFilePath)
 		return err
 	}
 
-	err = logic.DeleteFile(tempFilePath)
+	err = files.DeleteFile(tempFilePath)
 	if err != nil {
 		return err
 	}
@@ -74,7 +75,7 @@ func DownloadVersion(version string) error {
 		return err
 	}
 
-	logic.DebugPrintf("Successfully downloaded and installed Go version %s", version)
+	logger.DebugPrintf("Successfully downloaded and installed Go version %s", version)
 
 	return nil
 }
@@ -86,12 +87,12 @@ func AddAlias(sourceVersion string, targetVersion string) error {
 	sourcePath := filepath.Join(config.VersionsDirectory, sourceVersion, "go", "bin", "go")
 	targetPath := filepath.Join(config.BinDirectory, targetVersion)
 
-	if logic.FileExists(targetPath) {
-		logic.DebugPrintf("Alias target already exists: %s. Overwriting alias", targetPath)
-		logic.DeleteFile(targetPath)
+	if files.FileExists(targetPath) {
+		logger.DebugPrintf("Alias target already exists: %s. Overwriting alias", targetPath)
+		files.DeleteFile(targetPath)
 	}
 
-	logic.DebugPrintf("Adding alias for version %s: %s -> %s", sourceVersion, sourcePath, targetPath)
+	logger.DebugPrintf("Adding alias for version %s: %s -> %s", sourceVersion, sourcePath, targetPath)
 	err := os.Symlink(sourcePath, targetPath)
 	if err != nil {
 		return err

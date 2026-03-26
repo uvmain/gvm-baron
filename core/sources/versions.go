@@ -3,8 +3,8 @@ package sources
 import (
 	"encoding/json"
 	"gvm/core/cache"
-	"gvm/core/flags"
-	"gvm/core/logic"
+	"gvm/core/config"
+	"gvm/core/logger"
 	"log"
 	"net/http"
 	"net/url"
@@ -20,12 +20,12 @@ const (
 	VersionTypeAll    VersionType = "all"
 )
 
-func GetVersions() []string {
-	if !flags.NoCache {
-		cacheData, cacheAge, err := cache.LoadFromCache(flags.ListType)
+func GetVersions(versionType VersionType) []string {
+	if !config.NoCache {
+		cacheData, cacheAge, err := cache.LoadFromCache(string(versionType))
 		if err == nil {
 			if cacheAge < int(time.Hour)*24 {
-				logic.DebugPrintf("Using cached versions for type: %s", flags.ListType)
+				logger.DebugPrintf("Using cached versions for type: %s", versionType)
 				if items, ok := cacheData.Value.([]interface{}); ok {
 					result := make([]string, len(items))
 					for i, v := range items {
@@ -34,22 +34,22 @@ func GetVersions() []string {
 					return result
 				}
 			} else {
-				logic.DebugPrintf("Cache expired for type: %s, fetching new versions...", flags.ListType)
-				cache.DeleteCache(flags.ListType)
+				logger.DebugPrintf("Cache expired for type: %s, fetching new versions...", versionType)
+				cache.DeleteCache(string(versionType))
 			}
 		} else {
-			logic.DebugPrintf("error fetching cache: %s", err)
+			logger.DebugPrintf("error fetching cache: %s", err)
 		}
 	}
 
-	versions := FetchSourceVersions(VersionType(flags.ListType))
+	versions := FetchSourceVersions(versionType)
 
-	cache.SaveToCache(flags.ListType, versions)
+	cache.SaveToCache(string(versionType), versions)
 	return versions
 }
 
 func FetchSourceVersions(versionType VersionType) []string {
-	logic.DebugPrintln("fetching versions from go.dev/dl")
+	logger.DebugPrintln("fetching versions from go.dev/dl")
 	packageUrl, err := url.Parse("https://go.dev/dl/")
 	if err != nil {
 		log.Fatal(err)
@@ -63,7 +63,7 @@ func FetchSourceVersions(versionType VersionType) []string {
 	httpClient := &http.Client{}
 	response, err := httpClient.Get(packageUrl.String())
 	if err != nil {
-		logic.DebugPrintf("error fetching new versions: %s", err)
+		logger.DebugPrintf("error fetching new versions: %s", err)
 		return []string{}
 	}
 	defer response.Body.Close()
@@ -73,7 +73,7 @@ func FetchSourceVersions(versionType VersionType) []string {
 		Version string `json:"version"`
 	}
 	if err := json.NewDecoder(response.Body).Decode(&data); err != nil {
-		logic.DebugPrintf("error decoding new versions: %s", err)
+		logger.DebugPrintf("error decoding new versions: %s", err)
 		return []string{}
 	}
 	switch versionType {

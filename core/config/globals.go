@@ -2,7 +2,8 @@ package config
 
 import (
 	"fmt"
-	"gvm/core/logic"
+	"gvm/core/files"
+	"gvm/core/logger"
 	"os"
 	"runtime"
 )
@@ -15,7 +16,7 @@ var TempDirectory string
 var CacheDirectory string
 var VersionsDirectory string
 var BinDirectory string
-var DebugEnabled bool
+var NoCache bool
 
 func InitConfig() {
 	Platform = runtime.GOOS
@@ -23,19 +24,19 @@ func InitConfig() {
 	HomeDirectory, _ = os.UserHomeDir()
 	AppDirectory = fmt.Sprintf("%s%s%s", HomeDirectory, string(os.PathSeparator), ".gvm-baron")
 
-	logic.CreateDir(AppDirectory)
+	files.CreateDir(AppDirectory)
 
 	TempDirectory = fmt.Sprintf("%s%s%s", AppDirectory, string(os.PathSeparator), "temp")
-	logic.CreateDir(TempDirectory)
+	files.CreateDir(TempDirectory)
 
 	CacheDirectory = fmt.Sprintf("%s%s%s", AppDirectory, string(os.PathSeparator), "cache")
-	logic.CreateDir(CacheDirectory)
+	files.CreateDir(CacheDirectory)
 
 	VersionsDirectory = fmt.Sprintf("%s%s%s", AppDirectory, string(os.PathSeparator), "versions")
-	logic.CreateDir(VersionsDirectory)
+	files.CreateDir(VersionsDirectory)
 
 	BinDirectory = fmt.Sprintf("%s%s%s", AppDirectory, string(os.PathSeparator), "bin")
-	logic.CreateDir(BinDirectory)
+	files.CreateDir(BinDirectory)
 
-	logic.DebugPrintf("Initialized config: Platform=%s, Arch=%s, HomeDirectory=%s, AppDirectory=%s, TempDirectory=%s, CacheDirectory=%s, VersionsDirectory=%s, BinDirectory=%s", Platform, Arch, HomeDirectory, AppDirectory, TempDirectory, CacheDirectory, VersionsDirectory, BinDirectory)
+	logger.DebugPrintf("Initialized config: Platform=%s, Arch=%s, HomeDirectory=%s, AppDirectory=%s, TempDirectory=%s, CacheDirectory=%s, VersionsDirectory=%s, BinDirectory=%s", Platform, Arch, HomeDirectory, AppDirectory, TempDirectory, CacheDirectory, VersionsDirectory, BinDirectory)
 }

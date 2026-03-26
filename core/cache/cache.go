@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"gvm/core/config"
-	"gvm/core/logic"
+	"gvm/core/logger"
 	"os"
 	"path/filepath"
 	"time"
@@ -48,7 +48,7 @@ func DeleteCache(key string) error {
 
 func LoadFromCache(key string) (CacheData, int, error) {
 	cacheFilePath := getCacheFilePath(key)
-	logic.DebugPrintf("loading cache from file %s", cacheFilePath)
+	logger.DebugPrintf("loading cache from file %s", cacheFilePath)
 	if _, err := os.Stat(cacheFilePath); os.IsNotExist(err) {
 		return CacheData{}, 0, fmt.Errorf("cache file does not exist")
 	}
@@ -63,7 +63,7 @@ func LoadFromCache(key string) (CacheData, int, error) {
 		return CacheData{}, 0, fmt.Errorf("error decoding cache data: %v", err)
 	}
 	age := int(time.Now().Unix()) - cacheData.Timestamp
-	logic.DebugPrintf("cache value: %v", cacheData.Value)
+	logger.DebugPrintf("cache value: %v", cacheData.Value)
 	return cacheData, age, nil
 }
 

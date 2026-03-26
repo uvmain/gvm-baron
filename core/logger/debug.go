@@ -1,19 +1,20 @@
-package logic
+package logger
 
 import (
-	"gvm/core/flags"
 	"log"
 )
 
+var DebugEnabled bool
+
 func DebugPrintln(message string) {
-	if !flags.DebugEnabled {
+	if !DebugEnabled {
 		return
 	}
 	log.Println(message)
 }
 
 func DebugPrintf(format string, a ...interface{}) {
-	if !flags.DebugEnabled {
+	if !DebugEnabled {
 		return
 	}
 	log.Printf(format, a...)
