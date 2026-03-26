@@ -18,7 +18,7 @@ func main() {
 	logic.DebugPrintf("GVM app directory: %s", config.AppDirectory)
 
 	if flags.ListEnabled {
-		logic.DebugPrintf("Fetching available Go versions...")
+		logic.DebugPrintf("Listing available Go versions...")
 		versions := sources.GetVersions()
 		log.Printf("Available Go versions: %v", versions)
 	}

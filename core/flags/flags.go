@@ -15,6 +15,7 @@ var DownloadEnabled bool
 var DownloadVersion string
 
 var DebugEnabled bool
+var NoCache bool
 
 func InitFlags() {
 	args := os.Args[1:]
@@ -37,7 +38,7 @@ func InitFlags() {
 	listType := flag.String("list", "stable", "latest | stable | lts | all")
 
 	flag.BoolVar(&DebugEnabled, "debug", false, "Enable debug mode")
-
+	flag.BoolVar(&NoCache, "no-cache", false, "Disable cache")
 	downloadVersion := flag.String("download", "", "latest | lts | x.y.z | x.y")
 
 	flag.Parse()
