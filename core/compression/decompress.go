@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/schollz/progressbar/v3"
 )
 
 func unTarGz(source string, target string) error {
@@ -24,7 +26,40 @@ func unTarGz(source string, target string) error {
 	}
 	defer gzReader.Close()
 
+	// First pass: count total files for progress bar
 	tarReader := tar.NewReader(gzReader)
+	totalFiles := 0
+	for {
+		_, err := tarReader.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("failed to read tar entry: %w", err)
+		}
+		totalFiles++
+	}
+
+	// Reset readers for second pass
+	file.Close()
+	file, err = os.Open(source)
+	if err != nil {
+		return fmt.Errorf("failed to reopen source file: %w", err)
+	}
+	defer file.Close()
+
+	gzReader, err = gzip.NewReader(file)
+	if err != nil {
+		return fmt.Errorf("failed to create gzip reader: %w", err)
+	}
+	defer gzReader.Close()
+
+	tarReader = tar.NewReader(gzReader)
+
+	bar := progressbar.DefaultBytes(
+		int64(totalFiles),
+		"decompressing",
+	)
 
 	for {
 		header, err := tarReader.Next()
@@ -34,6 +69,8 @@ func unTarGz(source string, target string) error {
 		if err != nil {
 			return fmt.Errorf("failed to read tar entry: %w", err)
 		}
+
+		bar.Add(1)
 
 		targetPath := filepath.Join(target, header.Name)
 		if !strings.HasPrefix(filepath.Clean(targetPath), filepath.Clean(target)+string(os.PathSeparator)) {
@@ -79,8 +116,14 @@ func unZip(source string, target string) error {
 	}
 	defer reader.Close()
 
+	bar := progressbar.DefaultBytes(
+		int64(len(reader.File)),
+		"decompressing",
+	)
+
 	for _, file := range reader.File {
 		targetPath := fmt.Sprintf("%s%s%s", target, string(os.PathSeparator), file.Name)
+		bar.Add(1)
 		if file.FileInfo().IsDir() {
 			if err := os.MkdirAll(targetPath, os.ModePerm); err != nil {
 				return fmt.Errorf("error creating directory: %v", err)

@@ -8,9 +8,12 @@ import (
 	"gvm/core/files"
 	"gvm/core/logger"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/schollz/progressbar/v3"
 )
 
 func GenerateFileName(version string) string {
@@ -43,11 +46,33 @@ func DownloadVersion(version string) error {
 		return err
 	}
 
-	response, err := http.Get(downloadUrl)
+	headRequest, _ := http.NewRequest("HEAD", downloadUrl, nil)
+	headResponse, err := http.DefaultClient.Do(headRequest)
+	var contentLength int64 = -1
+	if err == nil && headResponse.StatusCode == http.StatusOK {
+		contentLength = headResponse.ContentLength
+		headResponse.Body.Close()
+	}
+
+	request, _ := http.NewRequest("GET", downloadUrl, nil)
+	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		tempFile.Close()
 		files.DeleteFile(tempFilePath)
 		return fmt.Errorf("failed to download version %s: %w", version, err)
+	}
+
+	if contentLength == -1 {
+		contentLength = response.ContentLength
+	}
+
+	var bar *progressbar.ProgressBar
+	if contentLength > 0 {
+		bar = progressbar.DefaultBytes(contentLength, "downloading")
+		log.Printf("content length: %d bytes", contentLength)
+	} else {
+		bar = progressbar.DefaultBytes(-1, "downloading")
+		log.Printf("content length: unknown (streaming)")
 	}
 	defer response.Body.Close()
 
@@ -57,7 +82,7 @@ func DownloadVersion(version string) error {
 		return fmt.Errorf("failed to download version %s: received non-200 response: %d", version, response.StatusCode)
 	}
 
-	_, err = io.Copy(tempFile, response.Body)
+	_, err = io.Copy(io.MultiWriter(tempFile, bar), response.Body)
 	if err != nil {
 		tempFile.Close()
 		files.DeleteFile(tempFilePath)
@@ -84,7 +109,7 @@ func DownloadVersion(version string) error {
 		return err
 	}
 
-	logger.DebugPrintf("Successfully downloaded and installed Go version %s", version)
+	log.Printf("Successfully downloaded and installed Go version %s", version)
 
 	return nil
 }
