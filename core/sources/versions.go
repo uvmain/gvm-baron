@@ -20,6 +20,17 @@ const (
 	VersionTypeAll    VersionType = "all"
 )
 
+func RefreshVersionCache() {
+	oldNoCache := config.NoCache
+	for _, versionType := range []VersionType{VersionTypeLatest, VersionTypeLts, VersionTypeStable, VersionTypeAll} {
+		config.NoCache = true
+		cache.DeleteCache(string(versionType))
+		logger.DebugPrintf("Refreshing version cache for type: %s", versionType)
+		GetVersions(versionType)
+	}
+	config.NoCache = oldNoCache
+}
+
 func GetVersions(versionType VersionType) []string {
 	if !config.NoCache {
 		cacheData, cacheAge, err := cache.LoadFromCache(string(versionType))

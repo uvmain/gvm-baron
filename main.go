@@ -61,6 +61,9 @@ func main() {
 	action := args[0]
 
 	switch action {
+	case "refresh-versions":
+		logger.DebugPrintln("Refreshing version cache...")
+		sources.RefreshVersionCache()
 	case "current":
 		logger.DebugPrintln("Getting current Go version...")
 		currentVersion, err := aliases.GetCurrentDefaultVersion()
@@ -176,9 +179,10 @@ Actions:
   alias <source> <target>  Create an alias from one version to another
   alias-delete <name>      Remove an alias by name
   remove <version>         Remove an installed Go version
+  refresh-versions         Fetch the latest versions and update the cache
 
 Flags:
   -h, --help       Show this help message
   -d, --debug      Enable debug output
-  -n, --no-cache   Disable caching`)
+  -n, --no-cache   Disable and overwrite version cache`)
 }
