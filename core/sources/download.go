@@ -2,6 +2,7 @@ package sources
 
 import (
 	"fmt"
+	"gvm/core/aliases"
 	"gvm/core/compression"
 	"gvm/core/config"
 	"gvm/core/files"
@@ -10,8 +11,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime"
-	"strings"
 )
 
 func GenerateFileName(version string) string {
@@ -80,36 +79,12 @@ func DownloadVersion(version string) error {
 		return err
 	}
 
-	err = AddAlias(version, "go"+version)
+	err = aliases.AddAlias(version, "go"+version)
 	if err != nil {
 		return err
 	}
 
 	logger.DebugPrintf("Successfully downloaded and installed Go version %s", version)
 
-	return nil
-}
-
-func AddAlias(sourceVersion string, targetVersion string) error {
-	if !strings.HasPrefix(sourceVersion, "go") {
-		sourceVersion = "go" + sourceVersion
-	}
-	sourcePath := filepath.Join(config.VersionsDirectory, sourceVersion, "go", "bin", "go")
-	targetPath := filepath.Join(config.BinDirectory, targetVersion)
-	if runtime.GOOS == "windows" {
-		sourcePath += ".exe"
-		targetPath += ".exe"
-	}
-
-	if files.FileExists(targetPath) {
-		logger.DebugPrintf("Alias target already exists: %s. Overwriting alias", targetPath)
-		files.DeleteFile(targetPath)
-	}
-
-	logger.DebugPrintf("Adding alias for version %s: %s -> %s", sourceVersion, sourcePath, targetPath)
-	err := os.Symlink(sourcePath, targetPath)
-	if err != nil {
-		return err
-	}
 	return nil
 }

@@ -29,3 +29,16 @@ func FileExists(filePath string) bool {
 	_, err := os.Stat(filePath)
 	return !os.IsNotExist(err)
 }
+
+func DirectoryExists(directoryPath string) bool {
+	_, err := os.Stat(directoryPath)
+	return !os.IsNotExist(err)
+}
+
+func DeleteDirectoryRecursive(directoryPath string) error {
+	err := os.RemoveAll(directoryPath)
+	if err != nil {
+		return err
+	}
+	return nil
+}

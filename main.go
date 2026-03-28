@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"gvm/core/aliases"
 	"gvm/core/config"
+	"gvm/core/installed"
 	"gvm/core/logger"
 	"gvm/core/sources"
 	"os"
@@ -27,7 +29,7 @@ func main() {
 		}
 	}
 
-	if len(args) == 0 || (slices.Contains(flags, "--help") && !slices.Contains(flags, "-h")) {
+	if len(args) == 0 || slices.Contains(flags, "--help") || slices.Contains(flags, "-h") {
 		if len(arguments) == 0 {
 			fmt.Println("No action specified. Valid actions are: list, install, alias.")
 			fmt.Println()
@@ -103,9 +105,31 @@ func main() {
 			fmt.Printf("Both --alias-source and --alias-target must be specified to create an alias.")
 			return
 		}
-		err := sources.AddAlias(aliasSource, aliasTarget)
+		err := aliases.AddAlias(aliasSource, aliasTarget)
 		if err != nil {
 			fmt.Printf("Error creating alias from %s to %s: %v", aliasSource, aliasTarget, err)
+		}
+	case "remove":
+		if len(args) < 2 {
+			fmt.Printf("No version specified for remove action. Usage: gvm remove <version>")
+			return
+		}
+		version := args[1]
+		logger.DebugPrintf("Removing Go version: %s", version)
+		err := installed.RemoveVersion(version)
+		if err != nil {
+			fmt.Printf("Error removing version %s: %v", version, err)
+		}
+	case "alias-delete":
+		if len(args) < 2 {
+			fmt.Printf("No alias name specified for alias-delete action. Usage: gvm alias-delete <name>")
+			return
+		}
+		name := args[1]
+		logger.DebugPrintf("Removing alias: %s", name)
+		err := aliases.DeleteAliasByName(name)
+		if err != nil {
+			fmt.Printf("Error removing alias %s: %v", name, err)
 		}
 	default:
 		fmt.Printf("Unknown action: %s. Valid actions are: list, install, alias.", action)
@@ -123,6 +147,8 @@ Actions:
                            Types: stable (default), latest, lts, all
   install <version>        Download and install a Go version
   alias <source> <target>  Create an alias from one version to another
+  alias-delete <name>      Remove an alias by name
+  remove <version>         Remove an installed Go version
 
 Flags:
   -h, --help       Show this help message
