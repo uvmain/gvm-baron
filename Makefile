@@ -14,3 +14,6 @@ build:
 
 clean:
 	rm -rf bin
+
+dependencies:
+	go mod tidy

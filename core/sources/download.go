@@ -38,21 +38,28 @@ func DownloadVersion(version string) error {
 	fileName := GenerateFileName(version)
 	logger.DebugPrintf("Downloading version %s from URL: %s", version, downloadUrl)
 	tempFilePath := filepath.Join(config.TempDirectory, fileName)
-	out, err := os.Create(tempFilePath)
+	tempFile, err := os.Create(tempFilePath)
 	if err != nil {
 		return err
 	}
-	defer out.Close()
 
 	response, err := http.Get(downloadUrl)
 	if err != nil {
+		tempFile.Close()
 		files.DeleteFile(tempFilePath)
-		return err
+		return fmt.Errorf("failed to download version %s: %w", version, err)
 	}
 	defer response.Body.Close()
 
-	_, err = io.Copy(out, response.Body)
+	if response.StatusCode != http.StatusOK {
+		tempFile.Close()
+		files.DeleteFile(tempFilePath)
+		return fmt.Errorf("failed to download version %s: received non-200 response: %d", version, response.StatusCode)
+	}
+
+	_, err = io.Copy(tempFile, response.Body)
 	if err != nil {
+		tempFile.Close()
 		files.DeleteFile(tempFilePath)
 		return err
 	}
@@ -61,10 +68,12 @@ func DownloadVersion(version string) error {
 
 	err = compression.DecompressFile(tempFilePath, targetPath)
 	if err != nil {
+		tempFile.Close()
 		files.DeleteFile(tempFilePath)
 		return err
 	}
 
+	tempFile.Close()
 	err = files.DeleteFile(tempFilePath)
 	if err != nil {
 		return err
