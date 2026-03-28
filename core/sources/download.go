@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -95,6 +96,10 @@ func AddAlias(sourceVersion string, targetVersion string) error {
 	}
 	sourcePath := filepath.Join(config.VersionsDirectory, sourceVersion, "go", "bin", "go")
 	targetPath := filepath.Join(config.BinDirectory, targetVersion)
+	if runtime.GOOS == "windows" {
+		sourcePath += ".exe"
+		targetPath += ".exe"
+	}
 
 	if files.FileExists(targetPath) {
 		logger.DebugPrintf("Alias target already exists: %s. Overwriting alias", targetPath)
