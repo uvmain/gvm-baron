@@ -13,6 +13,8 @@ import (
 )
 
 func main() {
+	config.InitConfig()
+
 	arguments := os.Args[1:]
 
 	args := make([]string, 0)
@@ -35,6 +37,12 @@ func main() {
 			fmt.Println()
 		}
 		printHelp()
+
+		currentVersion, _ := aliases.GetCurrentDefaultVersion()
+		if currentVersion != "" {
+			fmt.Println()
+			fmt.Printf("Current Go version: %s\n\n", currentVersion)
+		}
 		return
 	}
 
@@ -50,11 +58,17 @@ func main() {
 		logger.DebugPrintln("Cache enabled")
 	}
 
-	config.InitConfig()
-
 	action := args[0]
 
 	switch action {
+	case "current":
+		logger.DebugPrintln("Getting current Go version...")
+		currentVersion, err := aliases.GetCurrentDefaultVersion()
+		if err != nil {
+			fmt.Printf("Error getting current Go version: %v", err)
+			return
+		}
+		fmt.Printf("Current Go version: %s", currentVersion)
 	case "list":
 		logger.DebugPrintln("Listing available Go versions...")
 		var versionType sources.VersionType
@@ -154,6 +168,7 @@ Usage:
   gvm <action> [arguments] [flags]
 
 Actions:
+  current                  Display the currently active Go version
   list [type]              List available Go versions
                            Types: stable (default), latest, lts, all
   install <version>        Download and install a Go version

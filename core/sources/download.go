@@ -69,10 +69,8 @@ func DownloadVersion(version string) error {
 	var bar *progressbar.ProgressBar
 	if contentLength > 0 {
 		bar = progressbar.DefaultBytes(contentLength, "downloading")
-		log.Printf("content length: %d bytes", contentLength)
 	} else {
 		bar = progressbar.DefaultBytes(-1, "downloading")
-		log.Printf("content length: unknown (streaming)")
 	}
 	defer response.Body.Close()
 

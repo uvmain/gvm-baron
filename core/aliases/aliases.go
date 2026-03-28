@@ -143,3 +143,16 @@ func SetVersionAsDefault(version string) error {
 	logger.DebugPrintf("Version %s set as default: %s -> %s", version, existingDefaultAlias, versionPath)
 	return nil
 }
+
+func GetCurrentDefaultVersion() (string, error) {
+	defaultAlias := filepath.Join(config.BinDirectory, "go")
+	if runtime.GOOS == "windows" {
+		defaultAlias += ".exe"
+	}
+	linkTarget, err := os.Readlink(defaultAlias)
+	if err != nil {
+		return "", fmt.Errorf("error reading default alias: %v", err)
+	}
+	linkVersion := filepath.Base(filepath.Dir(filepath.Dir(filepath.Dir(linkTarget))))
+	return linkVersion, nil
+}
