@@ -26,7 +26,7 @@ func unTarGz(source string, target string) error {
 	}
 	defer gzReader.Close()
 
-	// First pass: count total files for progress bar
+	// count total files for progress bar
 	tarReader := tar.NewReader(gzReader)
 	totalFiles := 0
 	for {
@@ -39,9 +39,8 @@ func unTarGz(source string, target string) error {
 		}
 		totalFiles++
 	}
-
-	// Reset readers for second pass
 	file.Close()
+
 	file, err = os.Open(source)
 	if err != nil {
 		return fmt.Errorf("failed to reopen source file: %w", err)

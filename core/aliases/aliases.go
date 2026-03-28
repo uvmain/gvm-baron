@@ -11,12 +11,12 @@ import (
 	"strings"
 )
 
-func AddAlias(sourceVersion string, targetVersion string) error {
+func AddAlias(sourceVersion string, targetName string) error {
 	if !strings.HasPrefix(sourceVersion, "go") {
 		sourceVersion = "go" + sourceVersion
 	}
 	sourcePath := filepath.Join(config.VersionsDirectory, sourceVersion, "go", "bin", "go")
-	targetPath := filepath.Join(config.BinDirectory, targetVersion)
+	targetPath := filepath.Join(config.BinDirectory, targetName)
 	if runtime.GOOS == "windows" {
 		sourcePath += ".exe"
 		targetPath += ".exe"
@@ -107,4 +107,39 @@ func DeleteAliasByName(aliasName string) error {
 	} else {
 		return fmt.Errorf("alias %s does not exist", aliasPath)
 	}
+}
+
+func SetVersionAsDefault(version string) error {
+	if !strings.HasPrefix(version, "go") {
+		version = "go" + version
+	}
+	versionPath := filepath.Join(config.VersionsDirectory, version, "go", "bin", "go")
+	if runtime.GOOS == "windows" {
+		versionPath += ".exe"
+	}
+	if !files.FileExists(versionPath) {
+		return fmt.Errorf("version %s is not installed and cannot be set as default", version)
+	}
+
+	existingDefaultAlias := filepath.Join(config.BinDirectory, "go")
+	if runtime.GOOS == "windows" {
+		existingDefaultAlias += ".exe"
+	}
+	_, err := os.Lstat(existingDefaultAlias)
+	if !os.IsNotExist(err) {
+		logger.DebugPrintf("Removing existing default link: %s", existingDefaultAlias)
+		err := files.DeleteFile(existingDefaultAlias)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	err = AddAlias(version, "go")
+	if err != nil {
+		return fmt.Errorf("error setting version %s as default: %v", version, err)
+	}
+
+	logger.DebugPrintf("Version %s set as default: %s -> %s", version, existingDefaultAlias, versionPath)
+	return nil
 }

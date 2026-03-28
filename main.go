@@ -131,6 +131,17 @@ func main() {
 		if err != nil {
 			fmt.Printf("Error removing alias %s: %v", name, err)
 		}
+	case "use":
+		if len(args) < 2 {
+			fmt.Printf("No version specified for use action. Usage: gvm use <version>")
+			return
+		}
+		version := args[1]
+		logger.DebugPrintf("Switching to Go version: %s", version)
+		err := aliases.SetVersionAsDefault(version)
+		if err != nil {
+			fmt.Printf("Error switching to version %s: %v", version, err)
+		}
 	default:
 		fmt.Printf("Unknown action: %s. Valid actions are: list, install, alias.", action)
 	}
@@ -146,6 +157,7 @@ Actions:
   list [type]              List available Go versions
                            Types: stable (default), latest, lts, all
   install <version>        Download and install a Go version
+  use <version>            Switch to a specific Go version
   alias <source> <target>  Create an alias from one version to another
   alias-delete <name>      Remove an alias by name
   remove <version>         Remove an installed Go version
