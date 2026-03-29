@@ -67,6 +67,7 @@ gvm install lts
 
 # Switch to an installed version
 gvm use 1.21.0
+gvm use lts
 ```
 
 #### Aliases

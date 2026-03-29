@@ -113,6 +113,7 @@ func SetVersionAsDefault(version string) error {
 	if !strings.HasPrefix(version, "go") {
 		version = "go" + version
 	}
+
 	versionPath := filepath.Join(config.VersionsDirectory, version, "go", "bin", "go")
 	if runtime.GOOS == "windows" {
 		versionPath += ".exe"
@@ -132,7 +133,6 @@ func SetVersionAsDefault(version string) error {
 		if err != nil {
 			return err
 		}
-		return nil
 	}
 
 	err = AddAlias(version, "go")

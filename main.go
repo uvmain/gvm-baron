@@ -165,6 +165,16 @@ func main() {
 		}
 		version := args[1]
 		logger.DebugPrintf("Switching to Go version: %s", version)
+		if slices.Contains([]string{"latest", "lts", "stable"}, version) {
+			switch version {
+			case "latest":
+				version = sources.GetVersions(sources.VersionTypeLatest)[0]
+			case "lts":
+				version = sources.GetVersions(sources.VersionTypeLts)[0]
+			case "stable":
+				version = sources.GetVersions(sources.VersionTypeStable)[0]
+			}
+		}
 		err := aliases.SetVersionAsDefault(version)
 		if err != nil {
 			fmt.Printf("Error switching to version %s: %v", version, err)
