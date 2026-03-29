@@ -25,6 +25,14 @@ func DeleteFile(filePath string) error {
 	return nil
 }
 
+func ListDirectory(directoryPath string) ([]os.DirEntry, error) {
+	entries, err := os.ReadDir(directoryPath)
+	if err != nil {
+		return nil, err
+	}
+	return entries, nil
+}
+
 func FileExists(filePath string) bool {
 	_, err := os.Stat(filePath)
 	return !os.IsNotExist(err)

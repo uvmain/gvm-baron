@@ -20,6 +20,13 @@ const (
 	VersionTypeAll    VersionType = "all"
 )
 
+type AllVersionTypes struct {
+	VersionTypeLatest []string
+	VersionTypeLts    []string
+	VersionTypeStable []string
+	VersionTypeAll    []string
+}
+
 func RefreshVersionCache() {
 	oldNoCache := config.NoCache
 	for _, versionType := range []VersionType{VersionTypeLatest, VersionTypeLts, VersionTypeStable, VersionTypeAll} {
@@ -29,6 +36,15 @@ func RefreshVersionCache() {
 		GetVersions(versionType)
 	}
 	config.NoCache = oldNoCache
+}
+
+func GetAllVersionTypes() AllVersionTypes {
+	return AllVersionTypes{
+		VersionTypeLatest: GetVersions(VersionTypeLatest),
+		VersionTypeLts:    GetVersions(VersionTypeLts),
+		VersionTypeStable: GetVersions(VersionTypeStable),
+		VersionTypeAll:    GetVersions(VersionTypeAll),
+	}
 }
 
 func GetVersions(versionType VersionType) []string {

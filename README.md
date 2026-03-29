@@ -78,7 +78,7 @@ gvm alias 1.20.5 godev
 goprod run .
 
 # Remove an alias
-gvm alias-delete production
+gvm alias-delete goprod
 ```
 
 #### Version Management

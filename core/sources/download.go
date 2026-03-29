@@ -12,19 +12,26 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
 
 	"github.com/schollz/progressbar/v3"
 )
 
 func GenerateFileName(version string) string {
 	var extension string
+	var fileName string
 	switch config.Platform {
 	case "windows":
 		extension = "zip"
 	default:
 		extension = "tar.gz"
 	}
-	fileName := fmt.Sprintf("go%s.%s-%s.%s", version, config.Platform, config.Arch, extension)
+	if !strings.HasPrefix(version, "go") {
+		fileName = fmt.Sprintf("go%s.%s-%s.%s", version, config.Platform, config.Arch, extension)
+	} else {
+		fileName = fmt.Sprintf("%s.%s-%s.%s", version, config.Platform, config.Arch, extension)
+	}
 	logger.DebugPrintf("Generated file name: %s", fileName)
 	return fileName
 }
@@ -37,6 +44,17 @@ func GenerateDownloadUrl(version string) string {
 }
 
 func DownloadVersion(version string) error {
+	if slices.Contains([]string{"latest", "lts", "stable"}, version) {
+		switch version {
+		case "latest":
+			version = GetVersions(VersionTypeLatest)[0]
+		case "lts":
+			version = GetVersions(VersionTypeLts)[0]
+		case "stable":
+			version = GetVersions(VersionTypeStable)[0]
+		}
+	}
+
 	downloadUrl := GenerateDownloadUrl(version)
 	fileName := GenerateFileName(version)
 	logger.DebugPrintf("Downloading version %s from URL: %s", version, downloadUrl)

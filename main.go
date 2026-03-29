@@ -100,6 +100,16 @@ func main() {
 			return
 		}
 		fmt.Printf("Available Go versions: %v", versions)
+	case "list-installed":
+		logger.DebugPrintln("Listing installed Go versions...")
+		installedVersions, err := installed.GetInstalledVersions()
+		if err != nil {
+			fmt.Printf("Error listing installed versions: %v", err)
+			return
+		}
+		for _, version := range installedVersions {
+			fmt.Println(version)
+		}
 	case "install":
 		if len(args) < 2 {
 			fmt.Printf("No version specified for install action. Usage: gvm install <version>")
@@ -174,6 +184,7 @@ Actions:
   current                  Display the currently active Go version
   list [type]              List available Go versions
                            Types: stable (default), latest, lts, all
+	list-installed           List installed Go versions
   install <version>        Download and install a Go version
   use <version>            Switch to a specific Go version
   alias <source> <target>  Create an alias from one version to another
